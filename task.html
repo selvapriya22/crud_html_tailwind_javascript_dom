@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+      body {
+        font-family: cursive;
+      }
+      .card:hover {
+        transform: translateY(-5px);
+      }
+      .card {
+        transform: 0.5s ease;
+      }
+    </style>
+  </head>
+
+  <body
+    class="min-h-screen bg-gradient-to-br from-cyan-100 via-sky-200 to-sky-500 text-mist-700"
+  >
+    <div
+      class="rounded-2xl max-w-6xl mx-auto border border-white bg-white/50 my-10"
+    >
+      <div
+        class="text-xl uppercase tracking-[0.1em] font-bold text-center my-10 space-y-3"
+      >
+        <h3 class="text-indigo-400" id="typ"></h3>
+        <h2 class="text-blue-700 italic" id="setup"></h2>
+        <h2 class="text-blue-900 italic" id="punchline"></h2>
+      </div>
+
+      <div class="text-center my-10">
+        <button
+          class="rounded-xl bg-purple-500 px-6 py-3 fond-bold text-white shadow-lg text-md tracking-[0.1em] transition hover:bg-purple-700 active:scale-90"
+          onclick="getData()"
+        >
+          GENERATE A RANDOM JOKE
+        </button>
+        <button
+          class="rounded-xl bg-cyan-500 px-6 py-3 fond-bold text-white shadow-lg text-md tracking-[0.1em] transition hover:bg-sky-700 active:scale-80"
+          onclick="addToFav()"
+        >
+          FAVOURITE JOKE
+        </button>
+      </div>
+    </div>
+
+    <h2
+      class="card text-2xl tracking-[0.1em] text-indigo-900 font-bold text-center border border-white bg-white/80 rounded-md max-w-md mx-auto py-2 mb-5"
+    >
+      FAVOURITE JOKES
+    </h2>
+
+    <div>
+      <table class="mx-auto">
+        <thead class="text-xl border border-white bg-white/40">
+          <tr>
+            <th class="px-35 py-2">TYPE</th>
+            <th class="px-35">SETUP</th>
+            <th class="px-35">PUNCHLINE</th>
+            <th class="px-35">ACTION</th>
+          </tr>
+        </thead>
+        <tbody
+          id="result"
+          class="border border-white bg-white/40 space-y-10 text-center divide-y-10 divide-cyan-200"
+        ></tbody>
+      </table>
+    </div>
+  </body>
+
+  <script>
+    let apiResponse = null;
+    let favJoke = JSON.parse(localStorage.getItem("data")) || [];
+
+    const getData = async () => {
+      try {
+        apiResponse = await fetch(
+          "https://official-joke-api.appspot.com/random_joke",
+        );
+        apiResponse = await apiResponse.json();
+        console.log(apiResponse);
+
+        document.getElementById("typ").innerText = apiResponse.type;
+        document.getElementById("setup").innerText = apiResponse.setup;
+        document.getElementById("punchline").innerText = apiResponse.punchline;
+      } catch (error) {
+        console.log(error);
+        alert("ERROR");
+      }
+    };
+
+    getData();
+
+    const addToFav = () => {
+      favJoke.unshift(apiResponse);
+      let jsonData = JSON.stringify(favJoke);
+      localStorage.setItem("data", jsonData);
+      showFavData();
+      alert("ADDED");
+    };
+
+    const showFavData = () => {
+      favJoke = JSON.parse(localStorage.getItem("data")) || [];
+      let resultEl = document.getElementById("result");
+      resultEl.innerHTML = "";
+      favJoke.map(
+        (eachData) =>
+          (resultEl.innerHTML += `   <tr>
+         <td>${eachData.type}</td>
+          <td>${eachData.setup}</td>
+          <td>${eachData.punchline}</td>
+          <td><button onclick="deleteData('${eachData.punchline}')">DELETE</button></td>
+        </tr> `),
+      );
+    };
+
+    showFavData();
+
+    const deleteData = (dPunchline) => {
+      console.log(dPunchline);
+      favJoke = JSON.parse(localStorage.getItem("data"));
+      let filteredData = favJoke.filter(
+        (eachData) => eachData.punchline != dPunchline,
+      );
+      localStorage.setItem("data", JSON.stringify(filteredData));
+      alert("deleted");
+      showFavData();
+    };
+  </script>
+</html>
